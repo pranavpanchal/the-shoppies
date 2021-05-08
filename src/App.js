@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 
 import "./App.css";
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
 import { message, Row, Col, Typography, Card, Input, Button } from "antd";
 
@@ -9,14 +10,25 @@ const { Search } = Input;
 
 function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState();
+  const [movies, setMovies] = useState([]);
   const [nominations, setNominations] = useState([]);
+  const [page, setPage] = useState(1);
+  const [resp, setRes] = useState("True");
 
   useEffect(() => {
-    fetch(`http://www.omdbapi.com/?apikey=851b1493&type=movie&s=${query}`)
+    fetch(
+      `http://www.omdbapi.com/?apikey=851b1493&page=${page}&type=movie&s=${query}`
+    )
       .then((res) => res.json())
-      .then((json) => setMovies(json.Search));
-  }, [query]);
+      .then((json) => {
+        if (json.Error === "Movie not found!") {
+          message.error(json.Error);
+        }
+        setRes(json.Response);
+        setMovies([]);
+        setMovies(json.Search);
+      });
+  }, [query, page]);
 
   useEffect(() => {
     if (nominations.length >= 5) {
@@ -26,16 +38,32 @@ function App() {
 
   const onSearch = (value) => {
     setQuery(value);
+    setPage(1);
   };
 
-  const handleClick = (movie) => {
-    if (nominations.includes(movie)) {
+  const handlePagination = (ord) => {
+    if (ord === "increment") {
+      setPage((prevState) => prevState + 1);
+    } else if (ord === "decrement" && page > 1) {
+      setPage((prevState) => prevState - 1);
+    }
+  };
+
+  const hasItem = (item) => {
+    for (let nom of nominations) {
+      if (nom.imdbID === item.imdbID) {
+        return true;
+      }
+    }
+  };
+
+  const handleNomination = (movie) => {
+    if (hasItem(movie)) {
       setNominations(
         nominations.filter((item) => movie.imdbID !== item.imdbID)
       );
     } else {
       setNominations((prevState) => [...prevState, movie]);
-      console.log();
     }
   };
 
@@ -44,13 +72,35 @@ function App() {
       <Row>
         <Col span={4}></Col>
         <Col span={16}>
-          <Title style={styles.title}>The Shoppies</Title>
+          <Title style={styles.title}>🏆 The Shoppies</Title>
           <Card style={styles.card} title="Movie Title">
             <Search placeholder="search..." onSearch={onSearch} />
           </Card>
           <Row>
             <Col span={12}>
-              <Card style={styles.card} title={`Results for "${query}"`}>
+              <Card
+                style={styles.card}
+                title={
+                  <span>
+                    {`Results for "${query}"`}
+                    <span style={{ float: "right" }}>
+                      <Button
+                        shape="circle"
+                        icon={<LeftOutlined />}
+                        disabled={page < 2 || query === ""}
+                        onClick={() => handlePagination("decrement")}
+                      />
+                      {` ${page} `}
+                      <Button
+                        disabled={resp === "False"}
+                        shape="circle"
+                        icon={<RightOutlined />}
+                        onClick={() => handlePagination("increment")}
+                      />
+                    </span>
+                  </span>
+                }
+              >
                 <ul>
                   {movies &&
                     movies.map((movie) => {
@@ -58,11 +108,8 @@ function App() {
                         <li key={movie.imdbID} style={styles.li}>
                           {`${movie.Title} (${movie.Year})`}{" "}
                           <Button
-                            disabled={
-                              nominations.includes(movie) ||
-                              nominations.length >= 5
-                            }
-                            onClick={() => handleClick(movie)}
+                            disabled={hasItem(movie) || nominations.length >= 5}
+                            onClick={() => handleNomination(movie)}
                           >
                             Nominate
                           </Button>
@@ -80,7 +127,7 @@ function App() {
                       return (
                         <li key={nomination.imdbID} style={styles.li}>
                           {`${nomination.Title} (${nomination.Year})`}{" "}
-                          <Button onClick={() => handleClick(nomination)}>
+                          <Button onClick={() => handleNomination(nomination)}>
                             Remove
                           </Button>
                         </li>
