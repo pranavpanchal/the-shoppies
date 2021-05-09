@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from "react";
-
 import "./App.css";
-import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 
+import { LeftOutlined, RightOutlined } from "@ant-design/icons";
 import { message, Row, Col, Typography, Card, Input, Button } from "antd";
+import ReactConfetti from "react-confetti";
 
 const { Title } = Typography;
 const { Search } = Input;
 
-function App() {
+function App(props) {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [nominations, setNominations] = useState([]);
   const [page, setPage] = useState(1);
   const [resp, setRes] = useState("True");
+  const [confetti, setConfetti] = useState(false);
 
   useEffect(() => {
     fetch(
@@ -67,10 +68,29 @@ function App() {
     }
   };
 
+  const submitNoms = () => {
+    setConfetti(true);
+    message.success("Submitted!");
+    setNominations([]);
+    setQuery("");
+    setTimeout(() => {
+      setConfetti(false);
+    }, 3000);
+  };
+
   return (
     <div className="App">
       <Row>
         <Col span={4}></Col>
+        {confetti && (
+          <ReactConfetti
+            recycle={false}
+            gravity={0.4}
+            run={confetti}
+            numberOfPieces={400}
+            {...props.size}
+          />
+        )}
         <Col span={16}>
           <Title style={styles.title}>🏆 The Shoppies</Title>
           <Card style={styles.card} title="Movie Title">
@@ -135,6 +155,21 @@ function App() {
                     })}
                 </ul>
               </Card>
+              {nominations.length >= 5 && (
+                <>
+                  <Row style={styles.card}>
+                    <Col span={24}>
+                      <Button
+                        type="primary"
+                        style={{ width: "100%" }}
+                        onClick={submitNoms}
+                      >
+                        Submit
+                      </Button>
+                    </Col>
+                  </Row>
+                </>
+              )}
             </Col>
           </Row>
         </Col>
