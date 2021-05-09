@@ -73,6 +73,7 @@ function App(props) {
     message.success("Submitted!");
     setNominations([]);
     setQuery("");
+    setPage(1);
     setTimeout(() => {
       setConfetti(false);
     }, 3000);
