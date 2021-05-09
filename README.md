@@ -1,10 +1,14 @@
-# Getting Started with Create React App
+# The Shoppies
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project is hosted at [https://the-shoppies-202198.netlify.app/](https://the-shoppies-202198.netlify.app/) and was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
 
 In the project directory, you can run:
+
+### `yarn install`
+
+Installs dependencies and node modules.
 
 ### `yarn start`
 
