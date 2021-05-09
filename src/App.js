@@ -18,7 +18,7 @@ function App(props) {
 
   useEffect(() => {
     fetch(
-      `http://www.omdbapi.com/?apikey=851b1493&page=${page}&type=movie&s=${query}`
+      `https://www.omdbapi.com/?apikey=851b1493&page=${page}&type=movie&s=${query}`
     )
       .then((res) => res.json())
       .then((json) => {
